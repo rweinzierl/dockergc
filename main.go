@@ -45,11 +45,11 @@ Storage location of dockergc database is determined by environment variable %s
 Default storage location is %s
 
 gc: remove unpinned containers and images
-pc <name>: pin container
-pi <name>: pin image
-uc <name>: unpin container
-ui <name>: unpin image
-lc <name>: list pinned containers
-li <name>: list pinned images
+pc [NAME]: pin container
+pi [NAME]: pin image
+uc [NAME]: unpin container
+ui [NAME]: unpin image
+lc       : list pinned containers
+li       : list pinned images
 `, VarNameDbPath, DbPathDefault())
 }

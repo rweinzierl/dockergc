@@ -1,6 +1,0 @@
-Add support for volumes and networks
-
-consider pre-defined networks
-- bridge
-- host
-- none

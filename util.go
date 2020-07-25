@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"log"
+	"strings"
+)
 
 func NormalizeContainerName(name string) string {
 	if !strings.HasPrefix(name, "/") {
@@ -14,4 +17,10 @@ func NormalizeImageName(name string) string {
 		name = name + ":latest"
 	}
 	return name
+}
+
+func exitOnError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }

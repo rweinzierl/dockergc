@@ -10,7 +10,8 @@ import (
 var cli *client.Client
 
 func removeObsoleteContainersAndImages() (int, int) {
-	cli, _ = client.NewEnvClient()
+	cli, err := client.NewEnvClient()
+	exitOnError(err)
 	runningContainerIds := make(map[string]bool)
 	runningContainers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{})
 	for _, container := range runningContainers {
@@ -22,7 +23,8 @@ func removeObsoleteContainersAndImages() (int, int) {
 	}
 	containerToKeepIds := make(map[string]bool)
 	imageToKeepIds := make(map[string]bool)
-	containers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	exitOnError(err)
 	for _, container := range containers {
 		if _, ok := runningContainerIds[container.ID]; ok {
 			containerToKeepIds[container.ID] = true
@@ -39,7 +41,8 @@ func removeObsoleteContainersAndImages() (int, int) {
 	for _, name := range ReadAll(TypImage) {
 		pinnedImageNames[name] = true
 	}
-	images, _ := cli.ImageList(context.Background(), types.ImageListOptions{All: true})
+	images, err := cli.ImageList(context.Background(), types.ImageListOptions{All: true})
+	exitOnError(err)
 	for _, image := range images {
 		for _, tag := range image.RepoTags {
 			if _, ok := pinnedImageNames[tag]; ok {
@@ -50,7 +53,8 @@ func removeObsoleteContainersAndImages() (int, int) {
 	nContainers := 0
 	for _, container := range containers {
 		if _, ok := containerToKeepIds[container.ID]; !ok {
-			cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{})
+			err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{})
+			exitOnError(err)
 			nContainers++
 		}
 	}
