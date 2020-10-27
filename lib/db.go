@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"database/sql"
@@ -10,15 +10,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const typContainer = "container"
+const typImage = "image"
+
 func exitOnDbError(err error) {
 	if err != nil {
-		log.Printf("Error accessing database %s: %s", DbPath(), err)
+		log.Printf("Error accessing database %s: %s", dbPath(), err)
 		os.Exit(1)
 	}
 }
 
-func ReadAll(typ string) []string {
-	rows, err := Db().Query("SELECT name from pin where typ = ?", typ)
+func readAll(typ string) *[]string {
+	rows, err := getDB().Query("SELECT name from pin where typ = ?", typ)
 	exitOnDbError(err)
 	defer rows.Close()
 
@@ -28,25 +31,25 @@ func ReadAll(typ string) []string {
 		rows.Scan(&name)
 		names = append(names, name)
 	}
-	return names
+	return &names
 }
 
-func Add(typ string, name string) {
-	stmt, err := Db().Prepare("insert or ignore into pin(typ, name) values(?, ?)")
+func add(typ string, name string) {
+	stmt, err := getDB().Prepare("insert or ignore into pin(typ, name) values(?, ?)")
 	exitOnDbError(err)
 	stmt.Exec(typ, name)
 	defer stmt.Close()
 }
 
-func Remove(typ string, name string) {
-	stmt, err := Db().Prepare("delete from pin where typ = ? and name = ?")
+func remove(typ string, name string) {
+	stmt, err := getDB().Prepare("delete from pin where typ = ? and name = ?")
 	exitOnDbError(err)
 	stmt.Exec(typ, name)
 	defer stmt.Close()
 }
 
-func RemoveAll() {
-	stmt, err := Db().Prepare("delete from pin")
+func removeAll() {
+	stmt, err := getDB().Prepare("delete from pin")
 	exitOnDbError(err)
 	stmt.Exec()
 	defer stmt.Close()
@@ -54,22 +57,22 @@ func RemoveAll() {
 
 const VarNameDbPath = "DOCKERGC_DB"
 
-func DbPathDefault() string {
+func dbPathDefault() string {
 	usr, err := user.Current()
 	exitOnDbError(err)
 	return filepath.Join(usr.HomeDir, ".dockercg", "db.sqlite")
 }
 
-func DbPath() string {
+func dbPath() string {
 	if value, ok := os.LookupEnv(VarNameDbPath); ok && value != "" {
 		return value
 	} else {
-		return DbPathDefault()
+		return dbPathDefault()
 	}
 }
 
 func connect() *sql.DB {
-	path := DbPath()
+	path := dbPath()
 	os.MkdirAll(filepath.Dir(path), os.ModePerm)
 	database, err := sql.Open("sqlite3", path)
 	exitOnDbError(err)
@@ -81,7 +84,7 @@ func connect() *sql.DB {
 
 var theDb *sql.DB
 
-func Db() *sql.DB {
+func getDB() *sql.DB {
 	if theDb == nil {
 		theDb = connect()
 	}
