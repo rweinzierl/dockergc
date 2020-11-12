@@ -40,6 +40,7 @@ func gcContainers() {
 }
 
 func gcImages() {
+	deleteImageDanglingImages()
 	for _, image := range *getAllImages() {
 		if imageMayBeDeleted(&image) {
 			deleteImage(&image)

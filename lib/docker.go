@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
@@ -36,6 +37,12 @@ func deleteImage(image *types.ImageSummary) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func deleteImageDanglingImages() {
+	dangling := filters.NewArgs()
+	dangling.Add("dangling", "true")
+	(*getDocker()).ImagesPrune(context.Background(), dangling)
 }
 
 func deleteContainer(container *types.Container) {

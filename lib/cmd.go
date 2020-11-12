@@ -27,11 +27,16 @@ func listImages(cli *client.Client, imageNamePatterns []string) {
 	w := createTabWriter()
 	addTabRow(w, "REPOSITORY", "TAG", "IMAGE ID", "GC")
 	for _, image := range *getData().allImages {
+		fmt.Println(image.ID)
 		if imageMatchesAnyPattern(&image, &imageNamePatterns) {
 			for _, repoTag := range image.RepoTags {
 				repo, tag := splitImageName(repoTag)
 				_, id := splitImageID(image.ID)
 				addTabRow(w, repo, tag, id[:12], labelDelete(imageMayBeDeleted(&image)))
+			}
+			if len(image.RepoTags) == 0 {
+				_, id := splitImageID(image.ID)
+				addTabRow(w, "<none>", "<none>", id[:12], labelDelete(imageMayBeDeleted(&image)))
 			}
 		}
 	}
