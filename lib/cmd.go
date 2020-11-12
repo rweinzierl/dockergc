@@ -7,6 +7,13 @@ import (
 	"github.com/docker/docker/client"
 )
 
+func labelDelete(delete bool) string {
+	if delete {
+		return "remove"
+	}
+	return "keep"
+}
+
 func listImagePatterns(cli *client.Client) {
 	w := createTabWriter()
 	addTabRow(w, "IMAGE")
@@ -24,7 +31,7 @@ func listImages(cli *client.Client, imageNamePatterns []string) {
 			for _, repoTag := range image.RepoTags {
 				repo, tag := splitImageName(repoTag)
 				_, id := splitImageID(image.ID)
-				addTabRow(w, repo, tag, id[:12], imageMayBeDeleted(&image))
+				addTabRow(w, repo, tag, id[:12], labelDelete(imageMayBeDeleted(&image)))
 			}
 		}
 	}
@@ -45,7 +52,7 @@ func listContainers(cli *client.Client, containerNamePatterns []string) {
 	addTabRow(w, "CONTAINER ID", "IMAGE", "NAMES", "GC")
 	for _, container := range *getData().allContainers {
 		if containerMatchesAnyPattern(&container, &containerNamePatterns) {
-			addTabRow(w, container.ID[:12], container.Image, strings.Join(container.Names, ", "), containerMayBeDeleted(&container))
+			addTabRow(w, container.ID[:12], container.Image, strings.Join(container.Names, ", "), labelDelete(containerMayBeDeleted(&container)))
 		}
 	}
 	w.Flush()

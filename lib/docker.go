@@ -2,6 +2,7 @@ package lib
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -31,7 +32,10 @@ func getAllContainers() *[]types.Container {
 }
 
 func deleteImage(image *types.ImageSummary) {
-	getDocker().ImageRemove(context.Background(), image.ID, types.ImageRemoveOptions{})
+	_, err := getDocker().ImageRemove(context.Background(), image.ID, types.ImageRemoveOptions{})
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func deleteContainer(container *types.Container) {
